@@ -1,6 +1,6 @@
 
 # In short:
-Skymap is a database that offers: 1.) a single data matrix for each omic layer for each specie that spans >200k sequencing runs from all the public studies, which is done by reprocessing peta-bytes worth of sequencing data. 2.) a metadata file that extracted all the controlled keywords for the associated data matrix. The data is hosted in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). Code is hosted in github, the jupyer-notebooks aim to show analysis examples of going from data slicing to hypothesis testing ([CLIK ME: KEY WALK THROUGH](https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb) ). 
+Skymap is a database that offers: 1.) a single data matrix for each omic layer for each specie that spans >200k sequencing runs from all the public studies, which is done by reprocessing Peta-bytes worth of sequencing data. 2.) a metadata file that extracted all the controlled keywords for the associated data matrix. The data is hosted in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). Code is hosted in github, the jupyer-notebooks aim to show analysis examples of going from data slicing to hypothesis testing ([CLIK ME: KEY WALK THROUGH](https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb) ). 
 
 # In long: 
 ## Motivation- Pooling processed data from multiple studies is time-consuming: 
