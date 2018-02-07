@@ -3,7 +3,7 @@
 Skymap is a database that offers: 1.) a single data matrix for each omic layer for each specie that spans >200k sequencing runs from all the public studies, 2.) a metadata file that extracted all the controlled keywords for the associated data matrix. The data is hosted in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). Code is hosted in github, the jupyer-notebooks aim to show analysis examples of going from data slicing to hypothesis testing ([CLIK ME: KEY WALK THROUGH](https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb) ). 
 
 # In long: 
-##Motivation- Pooling processed data from multiple studies is time-consuming: 
+## Motivation- Pooling processed data from multiple studies is time-consuming: 
 When I first started in bioinformatic couple years ago, I spent much of my time doing two things: 1.) cleaning omic data matrices, e.g. mapping between gene IDs (hgnc, enseml, ucsc, etc.) for processed data matrices, trying all sort of different bioinformatics pipelines that yield basically the same results, investigating what is the exact unit being counted over when pulling data from public database, etc.  2.) cleaning metadata annotation, which usually involves extracting and mapping the labels to alias to the same categories. 
 
 This question came to my mind: Can we merge and reduce the peta-bytes worth of public omic data in a table while capturing the commonly used information that can fit into your hard drive (<500 GB), like firehose for TCGA data? 
