@@ -1331,7 +1331,7 @@ myHitTechnicalDf['Study'].value_counts().head(n=2)
 
 
 
-But it is unexpected that "Bone" show up? 
+Melanoma is expectded as a top tissue term, but "Bone" is a little bit surprising, 
 And when I reference SRA db: 
 https://www.ncbi.nlm.nih.gov/sra/?term=SRP067759
 It is showing this single cell leukemia RNAseq study study: https://www.nature.com/articles/nm.4336
