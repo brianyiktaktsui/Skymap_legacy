@@ -205,7 +205,11 @@ myChrPosDf.head()
 
 
 
-### combine with reference base
+# The above 20 lines are basically all you need to know
+to identify hundred thousands of sequencing runs with reads near your query postion. 
+
+Keep reading if you are interested in some examples of basic analysis. 
+
 
 ###### find reference base for each chrosome coordinate
 
@@ -1331,7 +1335,7 @@ myHitTechnicalDf['Study'].value_counts().head(n=2)
 
 
 
-Melanoma is expectded as a top tissue term, but "Bone" is a little bit surprising, 
+It is rather unexpected that the term "Bone" is the most freqeunt term. 
 And when I reference SRA db: 
 https://www.ncbi.nlm.nih.gov/sra/?term=SRP067759
 It is showing this single cell leukemia RNAseq study study: https://www.nature.com/articles/nm.4336
