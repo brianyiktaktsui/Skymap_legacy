@@ -11,7 +11,7 @@ Skymap is a standalone database that offers:
 
 #### Where they can all fit into your personal computer.
 
-#### If you intend to run the examples, the data is hosted in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
+#### If you intend to run the examples, please first download the data in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
 
 [In terms of validation of allelic alignment, we compared against TCGA pipeline as gold  standard.](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/CompareTCGA_alignment_w_mine_pipe.ipynb)
 
