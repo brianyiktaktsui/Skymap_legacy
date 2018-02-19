@@ -1,26 +1,55 @@
 
 
-# In short:
+# In short
 Skymap is a standalone database that offers: 
 1. **a single data matrix** for each omic layer for each species that [spans >200k sequencing runs from all the public studies](https://www.ncbi.nlm.nih.gov/sra), which is done by reprocessing **petabytes** worth of sequencing data. Here is how much published data are out there: 
 ![alt text](./Figures/sra_data_availability.png "Logo Title Text 1")
 
-2. **a biological metadata file** that describe the relationships between the sequencing runs and also the keywords extracted from freetext annotations using NLP. 
+2. **a biological metadata file** that describe the relationships between the sequencing runs and also the keywords extracted from over **3 million** freetext annotations using NLP. 
 3. **a techinical metadata file** that describe the relationships between the sequencing runs. 
 
 
-#### Where they can all fit into your personal computer.
+**Where they can all fit into your personal computer.**
 
-#### If you intend to run the examples, please first download the data in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
+** If you intend to run the examples, please first download the data in here:** https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
 
 [In terms of validation of allelic alignment, we compared against TCGA pipeline as gold  standard.](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/CompareTCGA_alignment_w_mine_pipe.ipynb)
 
-Here are the slides for explaining the process and rationale of [allelic read counts extraction over 300k known SNPs](https://docs.google.com/presentation/d/1KcumgtLfCdHNnIwkbU5DaQ7UNKHGbJ_fJZFy1cj53yE/edit#slide=id.p3), [RNAseq quantification and NLP processing](https://docs.google.com/presentation/d/14vLJJQ6ziw-2aLDoQAJGyv1sYo5ENzljsqsbZr9jNLM/edit#slide=id.p19)  in a semi-scientific manner.
+
+
+# In long
+## Motivation: Pooling processed data from multiple studies is time-consuming: 
+When I first started in bioinformatic couple years ago, I spent much of my time doing two things: 1.) cleaning omic data matrices, e.g. mapping between gene IDs (hgnc, enseml, ucsc, etc.) for processed data matrices, trying all sort of different bioinformatics pipelines that yield basically the same results, investigating what is the exact unit being counted over when pulling pre-processed data from public database, etc.  2.) cleaning metadata annotation, which usually involves extracting and aliasing the labels to the exact same categories. 
+
+
+This question came to my mind: Can we merge and reduce the petabytes worth of raw reads into a single table that: 1.) captures the commonly used information which can 2.) also fit in your hard drive (<500Gb)? 
+
+## Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer 
+What I am offering in here is a metadata table and a single data matrix for each omic layer that encapsulate majority of the public data out there by continuously pulling data from [Sequence Read Archive](https://www.ncbi.nlm.nih.gov/sra), a place that host the bulk of the published sequencing data. I believe that “Science started with counting” (from “Cancer: Emperor of all malady” by Siddhartha Mukherjee), and thus I offer counts for all the features: 1. ) the  base resolution ACGT counts for over 200k experiments among NCBI curated SNPs, where read depth and allelic fraction are usually the main drivers for SNP calling. We also offer an expression matrix, which counts at both transcript and gene resolution. With the raw counts, you can normalize however you want. 
+The metadata table consists of controlled vocabulary (NCI Terminology) from free text experiment annotations. I used the NLM metamap engine for extracting keywords from freetext. The nice thing is that the UMLS ecosystem from NLM allow the IDs (Concept Unique Identifiers) to be mapped onto different ontologies to relate the terms. NCIT is by far the cleanest general purpose ontology I have seen, low term redundancy, encode medical knowledge from many domains and is well maintained.  
+The pipeline in here is trying to suit the needs of the common use cases. In another word, most pipelines out there are more like sport cars, having custom flavors for a specific group of drivers. What I am trying to create is more like a train system, aiming to suit most needs. Unfortunately, if you have more specific requirements, what I am offering is probably not going to work. 
+
+
+Here are the overview slides for the overall processes of [allelic read counts extraction over 300k known SNPs](https://docs.google.com/presentation/d/1KcumgtLfCdHNnIwkbU5DaQ7UNKHGbJ_fJZFy1cj53yE/edit#slide=id.p3), [RNAseq quantification and NLP processing](https://docs.google.com/presentation/d/14vLJJQ6ziw-2aLDoQAJGyv1sYo5ENzljsqsbZr9jNLM/edit#slide=id.p19), explaining 1.) why the data is something that you can trust and 2.) also the utility of fast data interpolation, which is especially useful for aggregating multiple studies/batches to support you hypothesis.
+
+## Why Skymap while there are so many groups out there also trying to unify the public data
+To the best of my knowledge, Skymap is the first that offer both the unified omic data and the cleaned metadata. The other important aspect is that the process of data extraction is fully automated, so it is supposed to be scalable and systematic. 
+
+## Why Skymap offer a local copy instead of a web api 
+Again, the purpose of this project is more geared towards bioinformatics/ data scientists, who wants go from vast amount of data to hypothesis quickly. I hate when I have to recover a simple table by requesting each row from REST api repeately, which should have only required one click on an ftp link. It turns out that even [all the raw meta data from SRA can fit into memory](https://github.com/brianyiktaktsui/Skymap/blob/master/Load_RawMetaData.ipynb). 
+
+The premise of skymap is this: Couple clicks and all the omic data sits in your computer. And you can slice and dice it however you want afterwards. 
+
+## Data format and coding style
+
+The storage is in python pandas pickle format. Therefore, the only packges you need to load in the data is numpy and pandas, the backbone of data analysis in python. We keep the process of data loading as lean as possible. Less code means less bugs and less errors. For now, Skymap is geared towards ML/data science folks who are hungry for the vast amount of data and ain’t afraid of coding. I will port the data to native HDF5 format to reduce platform dependency once I get a chance. 
+
+I tried to keep the code and parameters to be lean and self-explanatory for your reference. 
+
 
 # Data slicing example
 
 ### Accessing allelic read count dataframe
-
 Slice out >100k experiments and their allelic counts in < 1s
 
 
@@ -34,7 +63,7 @@ baseDir='/cellar/users/btsui/Data/SRA/snp/'
 skymap_snp_dir=baseDir+'{specie}_snp_pos/'.format(specie=mySpecie)
 ```
 
-#### input query BRAF V600 coordinate 
+**input query BRAF V600 coordinate**
 
 
 ```python
@@ -42,7 +71,7 @@ skymap_snp_dir=baseDir+'{specie}_snp_pos/'.format(specie=mySpecie)
 queryChr,queryPosition='7',140753336 
 ```
 
-### static code for slicing out the data
+**static code for slicing out the data**
 
 
 ```python
@@ -65,9 +94,8 @@ print '# of sequencing runs sliced out:' ,tmpChunkDf.Run_digits.nunique()
     # of sequencing runs sliced out: 149064
 
 
-### Output data layout for allelic counts
+** definition of each column in allelic counts data**
 
-#### meaning of each column
 Chr: Chromosome
 
 Base: DNA bases in aligned reads - A, C, G, T 
@@ -246,7 +274,7 @@ geneS.head()
 
 
 
-### biological meta data
+### Accesing biological metadata dataframe
 
 For more information about bio_metaDf columns:
 
@@ -373,7 +401,7 @@ print '# of unique biomedical terms:',bio_metaDf['NCI'].nunique()
     # of unique biomedical terms: 20150
 
 
-### load in technical meta data
+### Accessing technical metadata dataframe
 
 For more information about the aliases used in the follow meta data:
 
@@ -597,9 +625,9 @@ technical_meta_data_df.head()
 
 
 
-# More examples using simple code to analyze big data
+# More examples on using simple code to analyze big data
 
-### If you intend to run the example notebooks, first download the data from synapse
+**If you intend to run the example notebooks, first download the data from synapse**
 
 https://www.synapse.org/#!Synapse:syn11415602/wiki/492470
 
@@ -608,17 +636,17 @@ https://www.synapse.org/#!Synapse:syn11415602/wiki/492470
 [Link](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/TemporalQuery_V4_all_clean.ipynb
 )
 
-Aggregating many studies (node) to form a smooth mouse developmental hierachy map. 
+Aggregating many studies (node) to form a smooth mouse developmental hierachy map. By integrating the vast amount of public data, we can cover many developmental time points, which sometime we can see a more transient expression dynamics both across tissues and within tissues over developmental time course. 
 
 Each componenet represent a tissue. Each node represent a particular study at a particular time unit. The color is base on the developmental time extracted from experimental annotation using regex. The node size represent the # of sequencing runs in that particulr time point and study. Each edge represent a differentiate-to or part-of relationship.
 ![alt text](./Figures/heirachy_time.png "Logo Title Text 1")
 And you can easily overlay gene expression level on top of it. As an example, Tp53 expression is known to be tightly regulated in development. Let's look at the dynamic of Tp53 expression over time and spatial locations in the following plot.
 ![alt_text](./Figures/heirachy_Trp53.png "tp53")
 
-#### Locating  SNP and relating to different data layers
+#### Locating  SNP and correlating with different data layers
 https://github.com/brianyiktaktsui/Skymap/blob/master/FindStudiesWithBrafV600Mutated.ipynb
-#### Simple data slicing and hypothesis testing
-[Link](https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb)
+#### Simple RNAseq data slicing and hypothesis testing
+https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb
 
 [Check here for more example notebooks](https://github.com/brianyiktaktsui/Skymap/tree/master/jupyter-notebooks
 )
@@ -639,26 +667,3 @@ Grant money that make this work possible: NIH DP5OD017937,GM103504
 Term of use: Use Skymap however you want. Just dont sue me, I have no money. 
 
 For why I named it Skymap, I forgot.
-
-
-# In long: 
-## Motivation: Pooling processed data from multiple studies is time-consuming: 
-When I first started in bioinformatic couple years ago, I spent much of my time doing two things: 1.) cleaning omic data matrices, e.g. mapping between gene IDs (hgnc, enseml, ucsc, etc.) for processed data matrices, trying all sort of different bioinformatics pipelines that yield basically the same results, investigating what is the exact unit being counted over when pulling data from public database, etc.  2.) cleaning metadata annotation, which usually involves extracting and aliasing the labels to the exact same categories. 
-
-This question came to my mind: Can we merge and reduce the peta-bytes worth of public omic data in a table while capturing the commonly used information that can fit into your hard drive (<500 GB), like firehose for TCGA data? 
-
-## Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer 
-What I am offering in here is a metadata table and a single data matrix for each omic layer that encapsulate majority of the public data out there. I do believe that “Science started with counting” (from “Cancer: Emperor of all malady” by Siddhartha Mukherjee), and thus I offer raw counts for all the features: 1. ) the  base resolution ACGT counts for over 200k experiments among NCBI curated SNPs, where read depth and allelic fraction are usually the main drivers for SNP calling. We also offer an expression matrix, where most counts at both transcript and gene resolution, where most normalization can be done post-hoc. 
-The metadata table consists of controlled vocabulary (NCI Terminology) from free text annotations of each experiment. I used the NLM metamap engine for this purpose. The nice thing is that the UMLS ecosystem from NLM allow the IDs (Concept Unique Identifiers) to be mapped onto different ontology hierarchy to relate the terms. 
-The pipeline in here is trying to suit the needs of the common use cases. In another word, most pipelines out there are more like sport cars, having custom flavors for a specific group of drivers. What I am trying to create is more like a train system, aiming to suit most needs. Unfortunately, if you have more specific requirements, what I am offering is probably not going to work. 
-
-## Why Skymap while there are so many groups out there also trying to unify the public data
-To the best of my knowledge, Skymap is the first that offer both the unified omic data and cleaned metadata. The other important aspect is that the process of data extraction is fully automated, so it is supposed to be scalable. 
-
-### Data format and coding style:
-
-The storage is in python pandas pickle format. Therefore, the only packges you need to load in the data is numpy and pandas, the backbone of data analysis in python. We keep the process of data loading as lean as possible, as less code means less bugs and less errors. For now, Skymap is geared towards ML/data science folks who are hungry for the vast amount of data and ain’t afraid of coding.
-
-I tried to keep the code and parameters to be lean and self-explanatory for your reference, but most of the scripts I wrote are far from the industrial standard. Most of the jupyter-notebooks are very flat, i.e. no function calling or object oriented, for the purpose of readability. For pipelines and packages, I try to use mostly object oriented programming. 
-
-
