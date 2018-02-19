@@ -11,9 +11,29 @@ Skymap is a standalone database that offers:
 
 **Where they can all fit into your personal computer.**
 
-** If you intend to run the examples, please first download the data in here:** https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
+** If you intend to run the examples, please first download the data from here:** https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
 
-[In terms of validation of allelic alignment, we compared against TCGA pipeline as gold  standard.](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/CompareTCGA_alignment_w_mine_pipe.ipynb)
+Table of Contents
+=================
+
+* [In short](#in-short)
+* [In long](#in-long)
+  * [Motivation: Pooling processed data from multiple studies is time\-consuming:](#motivation-pooling-processed-data-from-multiple-studies-is-time-consuming)
+  * [Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer](#solution-an-automated-pipeline-to-generate-a-single-data-matrix-that-does-simple-counting-for-each-specie-and-omic-layer)
+  * [Why Skymap while there are so many groups out there also trying to unify the public data](#why-skymap-while-there-are-so-many-groups-out-there-also-trying-to-unify-the-public-data)
+  * [Why Skymap offer a local copy instead of a web api](#why-skymap-offer-a-local-copy-instead-of-a-web-api)
+  * [Data format and coding style](#data-format-and-coding-style)
+* [Data slicing example](#data-slicing-example)
+    * [Accessing allelic read count dataframe](#accessing-allelic-read-count-dataframe)
+    * [Accessing RNAseq dataframe](#accessing-rnaseq-dataframe)
+    * [Accesing biological metadata dataframe](#accesing-biological-metadata-dataframe)
+    * [Accessing technical metadata dataframe](#accessing-technical-metadata-dataframe)
+* [More examples on using simple code to analyze big data](#more-examples-on-using-simple-code-to-analyze-big-data)
+  * [High resolution mouse developmental hierachy map](#high-resolution-mouse-developmental-hierachy-map)
+  * [Locating  SNP and correlating with different data layers](#locating--snp-and-correlating-with-different-data-layers)
+  * [Simple RNAseq data slicing and hypothesis testing](#simple-rnaseq-data-slicing-and-hypothesis-testing)
+  * [Acknowledgement](#acknowledgement)
+
 
 
 
@@ -30,7 +50,7 @@ The metadata table consists of controlled vocabulary (NCI Terminology) from free
 The pipeline in here is trying to suit the needs of the common use cases. In another word, most pipelines out there are more like sport cars, having custom flavors for a specific group of drivers. What I am trying to create is more like a train system, aiming to suit most needs. Unfortunately, if you have more specific requirements, what I am offering is probably not going to work. 
 
 
-Here are the overview slides for the overall processes of [allelic read counts extraction over 300k known SNPs](https://docs.google.com/presentation/d/1KcumgtLfCdHNnIwkbU5DaQ7UNKHGbJ_fJZFy1cj53yE/edit#slide=id.p3), [RNAseq quantification and NLP processing](https://docs.google.com/presentation/d/14vLJJQ6ziw-2aLDoQAJGyv1sYo5ENzljsqsbZr9jNLM/edit#slide=id.p19), explaining 1.) why the data is something that you can trust and 2.) also the utility of fast data interpolation, which is especially useful for aggregating multiple studies/batches to support you hypothesis.
+Here are the overview slides for the overall processes of [allelic read counts extraction over 300k known SNPs](https://docs.google.com/presentation/d/1KcumgtLfCdHNnIwkbU5DaQ7UNKHGbJ_fJZFy1cj53yE/edit#slide=id.p3), [RNAseq quantification and NLP processing](https://docs.google.com/presentation/d/14vLJJQ6ziw-2aLDoQAJGyv1sYo5ENzljsqsbZr9jNLM/edit#slide=id.p19), explaining 1.) why the data is something that you can trust and 2.) also the utility of fast data interpolation, which is especially useful for aggregating multiple studies/batches to support your hypothesis. 
 
 ## Why Skymap while there are so many groups out there also trying to unify the public data
 To the best of my knowledge, Skymap is the first that offer both the unified omic data and the cleaned metadata. The other important aspect is that the process of data extraction is fully automated, so it is supposed to be scalable and systematic. 
