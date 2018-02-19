@@ -1,5 +1,30 @@
-gh-md-toc
-# Table of content
+Table of Contents
+=================
+
+* [Table of content](#table-of-content)
+* [In short:](#in-short)
+      * [Where they can all fit into your personal computer\.](#where-they-can-all-fit-into-your-personal-computer)
+      * [If you intend to run the examples, please first download the data in here: <a href="https://www\.synapse\.org/skymap" rel="nofollow">https://www\.synapse\.org/skymap</a> (take &lt; 3 minutes to set up the account)\.](#if-you-intend-to-run-the-examples-please-first-download-the-data-in-here-httpswwwsynapseorgskymap-take--3-minutes-to-set-up-the-account)
+* [In long:](#in-long)
+  * [Motivation: Pooling processed data from multiple studies is time\-consuming:](#motivation-pooling-processed-data-from-multiple-studies-is-time-consuming)
+  * [Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer](#solution-an-automated-pipeline-to-generate-a-single-data-matrix-that-does-simple-counting-for-each-specie-and-omic-layer)
+  * [Why Skymap while there are so many groups out there also trying to unify the public data](#why-skymap-while-there-are-so-many-groups-out-there-also-trying-to-unify-the-public-data)
+    * [Data format and coding style:](#data-format-and-coding-style)
+  * [Data slicing example](#data-slicing-example)
+    * [Accessing allelic read count dataframe](#accessing-allelic-read-count-dataframe)
+      * [input query BRAF V600 coordinate](#input-query-braf-v600-coordinate)
+    * [static code for slicing out the data](#static-code-for-slicing-out-the-data)
+    * [Output data layout for allelic counts](#output-data-layout-for-allelic-counts)
+      * [meaning of each column](#meaning-of-each-column)
+    * [Accessing RNAseq dataframe](#accessing-rnaseq-dataframe)
+    * [biological meta data](#biological-meta-data)
+    * [load in technical meta data](#load-in-technical-meta-data)
+* [More examples using simple code to analyze big data](#more-examples-using-simple-code-to-analyze-big-data)
+    * [If you intend to run the example notebooks, first download the data from synapse](#if-you-intend-to-run-the-example-notebooks-first-download-the-data-from-synapse)
+      * [High resolution mouse developmental hierachy map](#high-resolution-mouse-developmental-hierachy-map)
+      * [Locating  SNP and relating to different data layers](#locating--snp-and-relating-to-different-data-layers)
+      * [Simple data slicing and hypothesis testing](#simple-data-slicing-and-hypothesis-testing)
+  * [Acknowledgement](#acknowledgement)
 
 Table of contents
 =================
