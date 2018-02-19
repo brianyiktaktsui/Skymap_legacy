@@ -5,7 +5,7 @@ Table of contents
 =================
 
 <!--ts-->
-   * [In long: ](#gh-md-toc)
+   * [Data slicing example](#gh-md-toc)
 
 <!--te-->
 
