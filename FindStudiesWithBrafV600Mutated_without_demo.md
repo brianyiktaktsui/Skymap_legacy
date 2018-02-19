@@ -43,7 +43,7 @@ I tried to keep the code and parameters to be lean and self-explanatory for your
 
 
 
-# Data slicing example
+## Data slicing example
 
 ### Accessing allelic read count dataframe
 
