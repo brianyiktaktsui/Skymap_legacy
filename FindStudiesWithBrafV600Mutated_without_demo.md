@@ -1,0 +1,667 @@
+
+# Table of content
+-[Data slicing example](#adding-toc-to-all-files-in-a-directory-and-sub-directories)
+
+
+# In short:
+Skymap is a standalone database that offers: 
+1. **a single data matrix** for each omic layer for each species that [spans >200k sequencing runs from all the public studies](https://www.ncbi.nlm.nih.gov/sra), which is done by reprocessing **petabytes** worth of sequencing data. Here is how much published data are out there: 
+![alt text](./Figures/sra_data_availability.png "Logo Title Text 1")
+
+2. **a biological metadata file** that describe the relationships between the sequencing runs and also the keywords extracted from freetext annotations using NLP. 
+3. **a techinical metadata file** that describe the relationships between the sequencing runs. 
+
+
+#### Where they can all fit into your personal computer.
+
+#### If you intend to run the examples, please first download the data in here: https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
+
+[In terms of validation of allelic alignment, we compared against TCGA pipeline as gold  standard.](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/CompareTCGA_alignment_w_mine_pipe.ipynb)
+
+Here are the slides for explaining the process and rationale of [allelic read counts extraction over 300k known SNPs](https://docs.google.com/presentation/d/1KcumgtLfCdHNnIwkbU5DaQ7UNKHGbJ_fJZFy1cj53yE/edit#slide=id.p3), [RNAseq quantification and NLP processing](https://docs.google.com/presentation/d/14vLJJQ6ziw-2aLDoQAJGyv1sYo5ENzljsqsbZr9jNLM/edit#slide=id.p19)  in a semi-scientific manner.
+
+
+# In long: 
+## Motivation: Pooling processed data from multiple studies is time-consuming: 
+When I first started in bioinformatic couple years ago, I spent much of my time doing two things: 1.) cleaning omic data matrices, e.g. mapping between gene IDs (hgnc, enseml, ucsc, etc.) for processed data matrices, trying all sort of different bioinformatics pipelines that yield basically the same results, investigating what is the exact unit being counted over when pulling data from public database, etc.  2.) cleaning metadata annotation, which usually involves extracting and aliasing the labels to the exact same categories. 
+
+This question came to my mind: Can we merge and reduce the peta-bytes worth of public omic data in a table while capturing the commonly used information that can fit into your hard drive (<500 GB), like firehose for TCGA data? 
+
+## Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer 
+What I am offering in here is a metadata table and a single data matrix for each omic layer that encapsulate majority of the public data out there. I do believe that “Science started with counting” (from “Cancer: Emperor of all malady” by Siddhartha Mukherjee), and thus I offer raw counts for all the features: 1. ) the  base resolution ACGT counts for over 200k experiments among NCBI curated SNPs, where read depth and allelic fraction are usually the main drivers for SNP calling. We also offer an expression matrix, where most counts at both transcript and gene resolution, where most normalization can be done post-hoc. 
+The metadata table consists of controlled vocabulary (NCI Terminology) from free text annotations of each experiment. I used the NLM metamap engine for this purpose. The nice thing is that the UMLS ecosystem from NLM allow the IDs (Concept Unique Identifiers) to be mapped onto different ontology hierarchy to relate the terms. 
+The pipeline in here is trying to suit the needs of the common use cases. In another word, most pipelines out there are more like sport cars, having custom flavors for a specific group of drivers. What I am trying to create is more like a train system, aiming to suit most needs. Unfortunately, if you have more specific requirements, what I am offering is probably not going to work. 
+
+## Why Skymap while there are so many groups out there also trying to unify the public data
+To the best of my knowledge, Skymap is the first that offer both the unified omic data and cleaned metadata. The other important aspect is that the process of data extraction is fully automated, so it is supposed to be scalable. 
+
+### Data format and coding style:
+
+The storage is in python pandas pickle format. Therefore, the only packges you need to load in the data is numpy and pandas, the backbone of data analysis in python. We keep the process of data loading as lean as possible, as less code means less bugs and less errors. For now, Skymap is geared towards ML/data science folks who are hungry for the vast amount of data and ain’t afraid of coding.
+
+I tried to keep the code and parameters to be lean and self-explanatory for your reference, but most of the scripts I wrote are far from the industrial standard. Most of the jupyter-notebooks are very flat, i.e. no function calling or object oriented, for the purpose of readability. For pipelines and packages, I try to use mostly object oriented programming. 
+
+
+
+# Data slicing example
+
+### Accessing allelic read count dataframe
+
+Slice out >100k experiments and their allelic counts in < 1s
+
+
+```python
+### parameters
+import pandas as pd
+import numpy as np
+mySpecie='Homo_sapiens'
+#change base dir to your data location
+baseDir='/cellar/users/btsui/Data/SRA/snp/'
+skymap_snp_dir=baseDir+'{specie}_snp_pos/'.format(specie=mySpecie)
+```
+
+#### input query BRAF V600 coordinate 
+
+
+```python
+#location where BRAF V600 happens, you can change it to whatever position you want 
+queryChr,queryPosition='7',140753336 
+```
+
+### static code for slicing out the data
+
+
+```python
+%%time
+chunkSize=100000 #fixed params
+myChunk=(queryPosition/chunkSize)*chunkSize # identify the chunk to load in
+hdf_s=pd.HDFStore(skymap_snp_dir+'Pos_block_'+str(myChunk),mode='r')#load in the chunk
+tmpChunkDf=hdf_s['/chunk'] 
+```
+
+    CPU times: user 112 ms, sys: 132 ms, total: 244 ms
+    Wall time: 303 ms
+
+
+
+```python
+print '# of sequencing runs sliced out:' ,tmpChunkDf.Run_digits.nunique()
+```
+
+    # of sequencing runs sliced out: 149064
+
+
+### Output data layout for allelic counts
+
+#### meaning of each column
+Chr: Chromosome
+
+Base: DNA bases in aligned reads - A, C, G, T 
+
+Run_db and Run_digits together forms a SRR accession id. I ignored the leading 0s for Run_digits. 
+
+ReadDepth: the number of bases detected in aligned reads at a particular base and chromosome position. 
+
+AverageBaseQuality: The mean phred score in aligned reads at a particular base and chromosome postiion. 
+
+Pos: Chromosome position. (grch38 for human)
+
+block: the block ID used for chunked storage
+
+
+```python
+tmpChunkDf.head()
+```
+
+
+
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>features</th>
+      <th>Run_digits</th>
+      <th>Pos</th>
+      <th>ReadDepth</th>
+      <th>AverageBaseQuality</th>
+      <th>block</th>
+    </tr>
+    <tr>
+      <th>Chr</th>
+      <th>base</th>
+      <th>Run_db</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="5" valign="top">2</th>
+      <th>C</th>
+      <th>SRR</th>
+      <td>796215</td>
+      <td>140700401</td>
+      <td>1</td>
+      <td>41</td>
+      <td>140700000</td>
+    </tr>
+    <tr>
+      <th>A</th>
+      <th>SRR</th>
+      <td>5882370</td>
+      <td>140700401</td>
+      <td>1</td>
+      <td>11</td>
+      <td>140700000</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">C</th>
+      <th>SRR</th>
+      <td>3420530</td>
+      <td>140700401</td>
+      <td>140</td>
+      <td>36</td>
+      <td>140700000</td>
+    </tr>
+    <tr>
+      <th>SRR</th>
+      <td>586184</td>
+      <td>140700401</td>
+      <td>2</td>
+      <td>35</td>
+      <td>140700000</td>
+    </tr>
+    <tr>
+      <th>SRR</th>
+      <td>4444531</td>
+      <td>140700401</td>
+      <td>16</td>
+      <td>39</td>
+      <td>140700000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### Accessing RNAseq dataframe
+
+Read out any gene expression level for >100k of experiments in 10ms. 
+
+input: genename, output: experiment by TPM vector
+
+
+```python
+"""
+a standalone function for memory mapping the data
+"""
+def loadDf(fname,mmap_mode='r'):
+    with open(fname+'.index.txt') as f:
+        myIndex=map(lambda s:s.replace("\n",""), f.readlines())
+    with open(fname+'.columns.txt') as f:
+        myColumns=map(lambda s:s.replace("\n",""), f.readlines())
+    tmpMatrix=np.load(fname+".npy",mmap_mode=mmap_mode)
+    tmpDf=pd.DataFrame(tmpMatrix,index=myIndex,columns=myColumns)
+    tmpDf.columns.name='Run'
+    return tmpDf
+```
+
+
+```python
+expressionMetric='TPM'
+#change this to where the matrix is located on your computer
+baseDir='/cellar/users/btsui/Data/nrnb01_nobackup/Data/SRA/MATRIX/DATA/hgGRC38/'
+dataMatrixDir=baseDir+'/allSRAmatrix.realign.v9.base.{feature}.gene.symbol'.format(feature=expressionMetric)
+```
+
+
+```python
+%%time
+rnaseqDf=loadDf(dataMatrixDir)
+```
+
+    CPU times: user 120 ms, sys: 24 ms, total: 144 ms
+    Wall time: 134 ms
+
+
+
+```python
+%%time
+geneS=rnaseqDf.loc['CDK1']
+```
+
+    CPU times: user 4 ms, sys: 0 ns, total: 4 ms
+    Wall time: 7.39 ms
+
+
+
+```python
+geneS.head()
+```
+
+
+
+
+    Run
+    SRR4456480    56.119999
+    SRR4456481     0.000000
+    SRR4456482     0.000000
+    SRR4456483     0.000000
+    SRR4456484     0.000000
+    Name: CDK1, dtype: float32
+
+
+
+### biological meta data
+
+For more information about bio_metaDf columns:
+
+Sample: https://www.ncbi.nlm.nih.gov/books/NBK56913/
+
+attribute: https://www.ncbi.nlm.nih.gov/biosample/docs/attributes/
+
+NCIT_Eng, NCIT_ID: https://ncit.nci.nih.gov/
+
+NLM_CUI: https://www.nlm.nih.gov/research/umls/new_users/online_learning/Meta_005.html
+
+The NLP tool used for mapping freetexts to terms is called metamap:
+https://metamap.nlm.nih.gov/
+
+
+```python
+metaDataMappingSDir='/cellar/users/btsui/Data/nrnb01_nobackup/METAMAP//input/allAttrib.v5.csv.NCI.prefilter.pyc'
+bio_metaDf=pd.read_pickle(metaDataMappingSDir)
+```
+
+Here is how it looks like
+
+
+```python
+bio_metaDf.head()
+```
+
+
+
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>srs</th>
+      <th>attrib</th>
+      <th>CUI</th>
+      <th>score</th>
+      <th>NCI</th>
+      <th>NciEng</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>SRS286232</td>
+      <td>sex</td>
+      <td>C1706180</td>
+      <td>1000</td>
+      <td>C46109</td>
+      <td>Male Gender</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SRS286232</td>
+      <td>sex</td>
+      <td>C1706429</td>
+      <td>1000</td>
+      <td>C46107</td>
+      <td>Male, Self-Report</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>SRS286232</td>
+      <td>sex</td>
+      <td>C1706428</td>
+      <td>1000</td>
+      <td>C46112</td>
+      <td>Male Phenotype</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>DRS052357</td>
+      <td>BioSampleModel</td>
+      <td>C1332821</td>
+      <td>694</td>
+      <td>C24597</td>
+      <td>CXCL9 Gene</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>DRS052357</td>
+      <td>BioSampleModel</td>
+      <td>C1707170</td>
+      <td>694</td>
+      <td>C49770</td>
+      <td>CXCL9 wt Allele</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+print '# of unique biological sample annotations with terms extracted:',bio_metaDf['srs'].nunique()
+```
+
+    # of unique biological sample annotations with terms extracted: 3068221
+
+
+Millions of biological annotations have NLP key words extracted with high number of unique terms, suggesting that public data deposited in SRA has both high volumne and diversity in experimental conditions. 
+
+
+```python
+print '# of unique biomedical terms:',bio_metaDf['NCI'].nunique()
+```
+
+    # of unique biomedical terms: 20150
+
+
+### load in technical meta data
+
+For more information about the aliases used in the follow meta data:
+
+https://www.ncbi.nlm.nih.gov/books/NBK56913/
+
+
+
+
+```python
+##change the directory
+sra_dump_pickle_dir='/cellar/users/btsui/Data/SRA/DUMP/sra_dump.pickle'
+technical_meta_data_df=pd.read_pickle(sra_dump_pickle_dir)
+```
+
+
+```python
+print '# of SRRs: ',technical_meta_data_df.shape[0]
+```
+
+    # of SRRs:  3763299
+
+
+
+```python
+technical_meta_data_df.head()
+```
+
+
+
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Member_Name</th>
+      <th>Experiment</th>
+      <th>Sample</th>
+      <th>Study</th>
+      <th>Spots</th>
+      <th>Bases</th>
+      <th>Status</th>
+      <th>ScientificName</th>
+      <th>LibraryStrategy</th>
+      <th>LibraryLayout</th>
+      <th>...</th>
+      <th>proj_accession_Updated</th>
+      <th>proj_accession_Published</th>
+      <th>proj_accession_Received</th>
+      <th>proj_accession_Type</th>
+      <th>proj_accession_Center</th>
+      <th>proj_accession_Visibility</th>
+      <th>proj_accession_Loaded</th>
+      <th>proj_accession_ReplacedBy</th>
+      <th>Run_db</th>
+      <th>Run_digits</th>
+    </tr>
+    <tr>
+      <th>Run</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>SRR2401865</th>
+      <td>default</td>
+      <td>SRX1244330</td>
+      <td>SRS1068422</td>
+      <td>-</td>
+      <td>2800.0</td>
+      <td>1416405.0</td>
+      <td>live</td>
+      <td>soil_metagenome</td>
+      <td>AMPLICON</td>
+      <td>SINGLE</td>
+      <td>...</td>
+      <td>2015-09-22</td>
+      <td>2015-09-20</td>
+      <td>2015-09-15</td>
+      <td>RUN</td>
+      <td>SUB1095135</td>
+      <td>public</td>
+      <td>1</td>
+      <td>-</td>
+      <td>SRR</td>
+      <td>2401865</td>
+    </tr>
+    <tr>
+      <th>SRR2401866</th>
+      <td>default</td>
+      <td>SRX1244331</td>
+      <td>SRS1068421</td>
+      <td>-</td>
+      <td>5082.0</td>
+      <td>2563605.0</td>
+      <td>live</td>
+      <td>soil_metagenome</td>
+      <td>AMPLICON</td>
+      <td>SINGLE</td>
+      <td>...</td>
+      <td>2015-09-22</td>
+      <td>2015-09-20</td>
+      <td>2015-09-15</td>
+      <td>RUN</td>
+      <td>SUB1095135</td>
+      <td>public</td>
+      <td>1</td>
+      <td>-</td>
+      <td>SRR</td>
+      <td>2401866</td>
+    </tr>
+    <tr>
+      <th>SRR2401867</th>
+      <td>default</td>
+      <td>SRX1244332</td>
+      <td>SRS1068420</td>
+      <td>-</td>
+      <td>6169.0</td>
+      <td>3175528.0</td>
+      <td>live</td>
+      <td>soil_metagenome</td>
+      <td>AMPLICON</td>
+      <td>SINGLE</td>
+      <td>...</td>
+      <td>2015-09-22</td>
+      <td>2015-09-20</td>
+      <td>2015-09-15</td>
+      <td>RUN</td>
+      <td>SUB1095135</td>
+      <td>public</td>
+      <td>1</td>
+      <td>-</td>
+      <td>SRR</td>
+      <td>2401867</td>
+    </tr>
+    <tr>
+      <th>SRR2401868</th>
+      <td>default</td>
+      <td>SRX1244333</td>
+      <td>SRS1068419</td>
+      <td>-</td>
+      <td>8102.0</td>
+      <td>4266915.0</td>
+      <td>live</td>
+      <td>soil_metagenome</td>
+      <td>AMPLICON</td>
+      <td>SINGLE</td>
+      <td>...</td>
+      <td>2015-09-22</td>
+      <td>2015-09-20</td>
+      <td>2015-09-15</td>
+      <td>RUN</td>
+      <td>SUB1095135</td>
+      <td>public</td>
+      <td>1</td>
+      <td>-</td>
+      <td>SRR</td>
+      <td>2401868</td>
+    </tr>
+    <tr>
+      <th>SRR2401869</th>
+      <td>default</td>
+      <td>SRX1244334</td>
+      <td>SRS1068418</td>
+      <td>-</td>
+      <td>4971.0</td>
+      <td>2519200.0</td>
+      <td>live</td>
+      <td>soil_metagenome</td>
+      <td>AMPLICON</td>
+      <td>SINGLE</td>
+      <td>...</td>
+      <td>2015-09-22</td>
+      <td>2015-09-20</td>
+      <td>2015-09-15</td>
+      <td>RUN</td>
+      <td>SUB1095135</td>
+      <td>public</td>
+      <td>1</td>
+      <td>-</td>
+      <td>SRR</td>
+      <td>2401869</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 22 columns</p>
+</div>
+
+
+
+# More examples using simple code to analyze big data
+
+### If you intend to run the example notebooks, first download the data from synapse
+
+https://www.synapse.org/#!Synapse:syn11415602/wiki/492470
+
+
+#### High resolution mouse developmental hierachy map
+[Link](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/TemporalQuery_V4_all_clean.ipynb
+)
+
+Aggregating many studies (node) to form a smooth mouse developmental hierachy map. 
+
+Each componenet represent a tissue. Each node represent a particular study at a particular time unit. The color is base on the developmental time extracted from experimental annotation using regex. The node size represent the # of sequencing runs in that particulr time point and study. Each edge represent a differentiate-to or part-of relationship.
+![alt text](./Figures/heirachy_time.png "Logo Title Text 1")
+And you can easily overlay gene expression level on top of it. As an example, Tp53 expression is known to be tightly regulated in development. Let's look at the dynamic of Tp53 expression over time and spatial locations in the following plot.
+![alt_text](./Figures/heirachy_Trp53.png "tp53")
+
+#### Locating  SNP and relating to different data layers
+https://github.com/brianyiktaktsui/Skymap/blob/master/FindStudiesWithBrafV600Mutated.ipynb
+#### Simple data slicing and hypothesis testing
+[Link](https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb)
+
+[Check here for more example notebooks](https://github.com/brianyiktaktsui/Skymap/tree/master/jupyter-notebooks
+)
+
+The code for the pipelines is here:
+https://github.com/brianyiktaktsui/Skymap/tree/master/code
+
+Skymap is still in Beta V0.0. [Please feel free to leave comments](https://www.synapse.org/#!Synapse:syn11415602/discussion/default) and suggestions!!! We would love to hear feedbacks from you.
+## Acknowledgement
+
+
+Please considering citing if you are using Skymap. (doi:10.7303/syn11415602)
+
+Acknowledgement: We want to thank for the advice and resources from Dr. Hannah Carter (my PI), Dr. Jill Mesirov,Dr. Trey Ideker and Shamin Mollah. We also want to thank Dr. Ruben Arbagayen, Dr. Nate Lewis for their suggestion. 
+The method will soon be posted in bioarchive. Also, we want to thank the Sage Bio Network for hosting the data. We also thank to thank the NCBI for holding all the published raw reads at  [Sequnece Read Archive](https://www.ncbi.nlm.nih.gov/sra). 
+Grant money that make this work possible: NIH DP5OD017937,GM103504
+
+Term of use: Use Skymap however you want. Just dont sue me, I have no money. 
+
+For why I named it Skymap, I forgot.
