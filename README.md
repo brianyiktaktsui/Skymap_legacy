@@ -16,29 +16,6 @@ Skymap is a standalone database that offers:
 [In terms of validation of allelic alignment, we compared against TCGA pipeline as gold  standard.](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/CompareTCGA_alignment_w_mine_pipe.ipynb)
 
 
-Table of Contents
-=================
-
-* [In short](#in-short)
-* [In long](#in-long)
-  * [Motivation: Pooling processed data from multiple studies is time\-consuming:](#motivation-pooling-processed-data-from-multiple-studies-is-time-consuming)
-  * [Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer](#solution-an-automated-pipeline-to-generate-a-single-data-matrix-that-does-simple-counting-for-each-specie-and-omic-layer)
-  * [Why Skymap while there are so many groups out there also trying to unify the public data](#why-skymap-while-there-are-so-many-groups-out-there-also-trying-to-unify-the-public-data)
-  * [Why Skymap offer a local copy instead of a web api](#why-skymap-offer-a-local-copy-instead-of-a-web-api)
-  * [Data format and coding style](#data-format-and-coding-style)
-* [Data slicing example](#data-slicing-example)
-    * [Accessing allelic read count dataframe](#accessing-allelic-read-count-dataframe)
-    * [Accessing RNAseq dataframe](#accessing-rnaseq-dataframe)
-    * [Accesing biological metadata dataframe](#accesing-biological-metadata-dataframe)
-    * [Accessing technical metadata dataframe](#accessing-technical-metadata-dataframe)
-* [More examples on using simple code to analyze big data](#more-examples-on-using-simple-code-to-analyze-big-data)
-      * [High resolution mouse developmental hierachy map](#high-resolution-mouse-developmental-hierachy-map)
-      * [Locating  SNP and correlating with different data layers](#locating--snp-and-correlating-with-different-data-layers)
-      * [Simple RNAseq data slicing and hypothesis testing](#simple-rnaseq-data-slicing-and-hypothesis-testing)
-  * [Acknowledgement](#acknowledgement)
-
-
-
 
 # In long
 ## Motivation: Pooling processed data from multiple studies is time-consuming: 
@@ -655,7 +632,7 @@ technical_meta_data_df.head()
 https://www.synapse.org/#!Synapse:syn11415602/wiki/492470
 
 
-#### High resolution mouse developmental hierachy map
+## High resolution mouse developmental hierachy map
 [Link](https://github.com/brianyiktaktsui/Skymap/blob/master/jupyter-notebooks/clean_notebooks/TemporalQuery_V4_all_clean.ipynb
 )
 
@@ -666,9 +643,9 @@ Each componenet represent a tissue. Each node represent a particular study at a 
 And you can easily overlay gene expression level on top of it. As an example, Tp53 expression is known to be tightly regulated in development. Let's look at the dynamic of Tp53 expression over time and spatial locations in the following plot.
 ![alt_text](./Figures/heirachy_Trp53.png "tp53")
 
-#### Locating  SNP and correlating with different data layers
+## Locating  SNP and correlating with different data layers
 https://github.com/brianyiktaktsui/Skymap/blob/master/FindStudiesWithBrafV600Mutated.ipynb
-#### Simple RNAseq data slicing and hypothesis testing
+## Simple RNAseq data slicing and hypothesis testing
 https://github.com/brianyiktaktsui/Skymap/blob/master/DataSlicingExample.ipynb
 
 [Check here for more example notebooks](https://github.com/brianyiktaktsui/Skymap/tree/master/jupyter-notebooks
