@@ -1,5 +1,14 @@
-
+gh-md-toc
 # Table of content
+
+Table of contents
+=================
+
+<!--ts-->
+   * [In long: ](#gh-md-toc)
+
+<!--te-->
+
 -[Data slicing example](#adding-toc-to-all-files-in-a-directory-and-sub-directories)
 
 
