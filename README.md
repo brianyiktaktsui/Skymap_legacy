@@ -16,7 +16,6 @@ Skymap is a standalone database that offers:
 Table of Contents
 =================
 
-* [In short](#in-short)
 * [In long](#in-long)
   * [Motivation: Pooling processed data from multiple studies is time\-consuming:](#motivation-pooling-processed-data-from-multiple-studies-is-time-consuming)
   * [Solution: An automated pipeline to generate a single data matrix that does simple counting for each specie and omic layer](#solution-an-automated-pipeline-to-generate-a-single-data-matrix-that-does-simple-counting-for-each-specie-and-omic-layer)
