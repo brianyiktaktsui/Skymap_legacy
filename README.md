@@ -11,7 +11,7 @@ Skymap is a standalone database that offers:
 
 **Where they can all fit into your personal computer.**
 
-** If you intend to run the examples, please first download the data from here:** https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
+**If you intend to run the examples, please first download the data from here:** https://www.synapse.org/skymap (take < 3 minutes to set up the account). 
 
 Table of Contents
 =================
